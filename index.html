@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="style.css">
+  <title>승민의 역사 학습 사이트</title>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body>
+  <div id="game-container">
+  <div id="header">
+    <h1>역사 학습 사이트</h1>
+    <h2 id="nickname">안녕하세요</h2>
+    <p>1학년 9반 역사 학습 사이트입니다.</p>
+    
+    <div class="box" style="margin: 20px 0; padding: 15px; background: #787878; border-radius: 10px; font-size: 1em;">
+      <div style="display: flex; justify-content: space-around; font-weight: bold; margin-bottom: 8px;">
+        <span>✨ 내 포인트: <span id="display-point" style="color: #228be6;">0</span> 점</span>
+        <span>🪙 내 코인: <span id="display-coin" style="color: #fcc419;">0</span> 개</span>
+      </div> 
+      <div style="font-size: 0.85em; color: #000000; text-align: center; margin-top: 5px; border-top: 1px solid #e9ecef; padding-top: 5px;">
+        원하는 메뉴를 선택하여 학습을 시작하세요!
+      </div>
+    </div>
+
+    <div id="menu-area">
+      <button class="btn" onclick="location.href='index.html'">메인 화면</button>
+      <button class="btn btn-category" onclick="goToQuiz(1)"> 역사 퀴즈 풀기</button>
+      <button class="btn" onclick="location.href='store.html'">상점(실험 기능)</button>
+      <button class="btn" style="background-color: #40c057; color: white;" onclick="updateRanking()">🏆 랭킹 등록하기</button>
+    </div>
+
+    <div id="ranking-area" style="margin-top: 30px; background: #f1f3f5; padding: 15px; border-radius: 10px; color: #333;">
+      <h3 style="margin-top: 0; color: #212529;">🔥 1학년 9반 실시간 TOP 5 랭킹</h3>
+      <table style="width: 100%; border-collapse: collapse; text-align: center;">
+        <thead>
+          <tr style="border-bottom: 2px solid #dee2e6; font-weight: bold;">
+            <th style="padding: 8px;">순위</th>
+            <th>이름</th>
+            <th>포인트</th>
+          </tr>
+        </thead>
+        <tbody id="ranking-list">
+          <tr>
+            <td colspan="3" style="padding: 10px; color: #868e96;">랭킹 정보를 불러오는 중...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="setting">
+      <br><br><br>
+      <input class="btn" type="text" placeholder="변경할 이름" id="name">
+      <button class="btn btn-category" onclick="changeName()">이름 변경 하기</button>
+    </div>
+
+    <div id="footer" style="margin-top: 20px; color: #000000; font-size: 0.8em;">
+      마음대로 공유하지 마세요😢
+    </div>
+  </div>
+</div>
+  <script>
+    // 🔥 본인의 Firebase 설정 값으로 교체하세요!
+  const firebaseConfig = {
+    apiKey: "AIzaSyDCrK6BUBzsdZz-mB49mO8vbRgm_fyuPtw",
+    authDomain: "historyquiz-6f9b8.firebaseapp.com",
+    projectId: "historyquiz-6f9b8",
+    storageBucket: "historyquiz-6f9b8.firebasestorage.app",
+    messagingSenderId: "716549733296",
+    appId: "1:716549733296:web:87ed0000657fcc68047475",
+    measurementId: "G-2BZ4V1NDHV"
+  };
+    
+    // Firebase 및 Firestore 초기화
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let userData;
+    const key = 'historyQuiz3';
+
+    // 고유 ID 생성을 위한 간단한 함수 (UUID)
+    function generateUUID() {
+      return 'user_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+    }
+
+    // 페이지 로드 시 로컬 스토리지 데이터 반영 및 랭킹 불러오기
+    window.onload = function() {
+      const savedData = localStorage.getItem(key);
+      
+      if (savedData === null) {
+        const setting = {
+          uid: generateUUID(), // ✨ 유저 고유 식별 ID 추가
+          coin: 0,
+          point: 0,
+          lv: 1,
+          name: "이름 없음",
+          inv: ["역사왕초보"],
+          equip: ["역사왕초보"],
+          clear: [true, true, true, true, true, true, true, true, true]
+        };
+        localStorage.setItem(key, JSON.stringify(setting));
+        userData = setting;
+      } else {
+        userData = JSON.parse(savedData);
+        // 만약 기존 데이터에 uid가 없다면 새로 생성해서 넣어줌 (하위 호환성)
+        if (!userData.uid) {
+          userData.uid = generateUUID();
+          localStorage.setItem(key, JSON.stringify(userData));
+        }
+      }
+
+      // 화면 데이터 반영
+      document.getElementById('nickname').innerText = userData.name;
+      document.getElementById("display-coin").innerText = userData.coin;
+      document.getElementById("display-point").innerText = userData.point;
+
+      // 실시간 랭킹 감시 시작
+      listenRanking();
+    };
+      
+    function goToQuiz(value) {
+      location.href = "historyquiz.html";
+    }
+
+    // ✨ 이름을 변경할 때 고유 ID를 사용하여 Firestore를 업데이트하는 기능
+    function changeName(){
+      const newName = document.getElementById("name").value.trim();
+      if(newName === "") {
+        alert("이름을 입력해주세요!");
+        return;
+      }
+
+      // 1. 로컬 데이터 변경 및 저장
+      userData.name = newName;
+      document.getElementById('nickname').innerText = userData.name;
+      localStorage.setItem(key, JSON.stringify(userData));
+      document.getElementById("name").value = "";
+
+      // 2. Firestore에 기존 등록된 내 고유 ID 문서가 있는지 확인 후 연동 수정
+      const userRef = db.collection("rankings").doc(userData.uid);
+
+      userRef.get().then((doc) => {
+        if (doc.exists) {
+          const serverPoint = doc.data().point || 0;
+          
+          // 핵심 요건: 내 현재 로컬 점수가 서버에 기록된 최고 점수보다 높을 때만 닉네임과 점수 모두 교체
+          if (userData.point > serverPoint) {
+            userRef.update({
+              name: newName,
+              point: userData.point,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          } else {
+            // 내 현재 점수가 서버 점수보다 낮거나 같다면, 점수는 유지하고 이름만 새 이름으로 교체
+            userRef.update({
+              name: newName
+            });
+          }
+        }
+        alert("이름이 변경되었습니다!");
+      }).catch((error) => {
+        console.error("이름 변경 서버 반영 에러: ", error);
+        alert("이름은 변경되었으나 랭킹 반영에 실패했습니다.");
+      });
+    }
+
+    // ✨ [랭킹 등록하기] 버튼 클릭 시 고유 ID 기준으로 최고 점수 저장하는 함수
+    function updateRanking() {
+      if (userData.name === "이름 없음") {
+        alert("이름을 먼저 변경한 후 랭킹에 등록해주세요!");
+        return;
+      }
+
+      // 문서의 ID를 '이름'이 아니라 생성한 고유 식별자 'uid'로 지정합니다.
+      const userRef = db.collection("rankings").doc(userData.uid);
+
+      userRef.get().then((doc) => {
+        if (doc.exists) {
+          // 기존 기록이 있다면, 현재 내 로컬 점수가 서버 점수보다 높을 때만 업데이트
+          const serverPoint = doc.data().point || 0;
+          if (userData.point > serverPoint) {
+            userRef.set({
+              uid: userData.uid,
+              name: userData.name,
+              point: userData.point,
+              timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+              alert("최고 기록이 경신되어 랭킹이 등록되었습니다! 🎉");
+            });
+          } else {
+            alert(`이미 더 높은 기록(${serverPoint}점)이 등록되어 있습니다!`);
+          }
+        } else {
+          // 아예 처음 랭킹판에 등록하는 고유 유저라면 새로 생성
+          userRef.set({
+            uid: userData.uid,
+            name: userData.name,
+            point: userData.point,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          }).then(() => {
+            alert("랭킹에 처음으로 등록되었습니다! 축하합니다! 🏆");
+          });
+        }
+      }).catch((error) => {
+        console.error("랭킹 등록 에러: ", error);
+        alert("랭킹 등록에 실패했습니다.");
+      });
+    }
+
+    // Firestore에서 실시간으로 데이터를 읽어와 랭킹 테이블을 채우는 함수
+    function listenRanking() {
+      db.collection("rankings")
+        .orderBy("point", "desc")
+        .limit(5)
+        .onSnapshot((snapshot) => {
+          const rankingListBody = document.getElementById("ranking-list");
+          rankingListBody.innerHTML = ""; 
+
+          if (snapshot.empty) {
+            rankingListBody.innerHTML = `<tr><td colspan="3" style="padding: 10px; color: #868e96;">아직 등록된 랭킹이 없습니다. 1등을 차지해보세요!</td></tr>`;
+            return;
+          }
+
+          let rank = 1;
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            
+            const row = `
+              <tr style="border-bottom: 1px solid #e9ecef; ${data.uid === userData.uid ? 'background-color: #e7f5ff; font-weight: bold;' : ''}">
+                <td style="padding: 8px; color: ${rank === 1 ? '#fcc419' : '#495057'}">${rank}등</td>
+                <td>${data.name} ${data.uid === userData.uid ? '(나)' : ''}</td>
+                <td style="font-weight: bold; color: #228be6;">${data.point} 점</td>
+              </tr>
+            `;
+            rankingListBody.innerHTML += row;
+            rank++;
+          });
+        }, (error) => {
+          console.error("랭킹 로드 에러: ", error);
+        });
+    }
+  </script>
+
+</body>
+</html>
