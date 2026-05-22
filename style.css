@@ -1,0 +1,104 @@
+/* 전체적인 룩앤필을 위한 기본 배경 */
+body {
+  font-family: 'Pretendard', -apple-system, sans-serif;
+  /* 글래스모피즘이 가장 돋보이는 트렌디한 그라데이션 배경으로 변경 */
+  background: linear-gradient(135deg, #667eea 0%, #4047a7 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+/* 기존의 #header를 메인 글래스 카드로 변형 */
+#header {
+  background: rgba(255, 255, 255, 0.2); /* 반투명 흰색 배경 */
+  width: 90%;
+  max-width: 450px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); /* 부드럽고 깊은 그림자 */
+  backdrop-filter: blur(12px); /* 배경 흐림 효과 (핵심!) */
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3); /* 테두리에 하이라이트 효과 */
+  padding: 30px;
+  text-align: center;
+  color: #ffffff; /* 내부 텍스트 컬러를 흰색으로 변경 */
+  box-sizing: border-box;
+}
+
+.hidden {
+  display: none;
+}
+
+/* 기본 버튼 스타일 (초록색 계열 -> 세련된 반투명 느낌 포함) */
+.btn {
+  background-color: rgba(76, 175, 80, 0.85); /* 약간의 투명도 부여 */
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 16px;
+  margin: 8px 0; /* 좌우 여백 빼고 위아래만 깔끔하게 정렬 */
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+  font-weight: 600;
+}
+
+.btn:hover {
+  background-color: rgb(76, 175, 80); /* 호버 시 불투명해지며 강조 */
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+}
+
+/* 카테고리 버튼 스타일 (파란색 계열) */
+.btn-category {
+  background-color: rgba(0, 123, 255, 0.85); /* 약간의 투명도 부여 */
+}
+
+.btn-category:hover {
+  background-color: rgb(0, 123, 255); /* 호버 시 불투명해지며 강조 */
+  box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+}
+
+/* 버튼을 클릭했을 때 살짝 눌리는 인터랙션 추가 */
+.btn:active {
+  transform: translateY(0);
+}
+
+/* 입력창 스타일 (글래스 카드와 조화를 이루도록 수정) */
+input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  margin: 20px 0;
+  background: rgba(255, 255, 255, 0.15); /* 어두운 투명 대신 밝은 은은한 투명 */
+  border: 1px solid rgba(255, 255, 255, 0.25); /* 얇은 유광 테두리 */
+  border-radius: 10px;
+  box-sizing: border-box;
+  font-size: 16px;
+  color: #ffffff; /* 글자색을 흰색으로 하여 가독성 확보 */
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+/* 입력창 내부 플레이스홀더(안내 문구) 색상 */
+input[type="text"]::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* 입력창 클릭(포커스) 시 시각 효과 */
+input[type="text"]:focus {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+/* 피드백 메시지 영역 */
+#feedback {
+  height: 24px;
+  margin-top: 10px;
+  font-weight: bold;
+  color: #ffffff; /* 피드백 글씨도 잘 보이도록 흰색으로 변경 */
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2); /* 가독성을 위한 미세한 그림자 */
+}
