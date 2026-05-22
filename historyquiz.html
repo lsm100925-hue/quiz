@@ -302,8 +302,7 @@ const count = userData.equip[showA] ?? 0;
 document.getElementById("input").innerText = "정답 티켓 사용: "+ count;
     // Optional: Add logic here to advance to the next question or refresh the UI
   } else {
-    userData.coin+=1000
-      save()
+
     // Optional: Alert the user that they don't have the required item
     alert("정답 티켓이 부족합니다");
   }
