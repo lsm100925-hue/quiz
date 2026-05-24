@@ -111,7 +111,6 @@
         return;
       }
 
-      // 1. 로컬 데이터 변경 및 저장
       userData.name = newName;
       document.getElementById('nickname').innerText = userData.name;
       localStorage.setItem(key, JSON.stringify(userData));
@@ -124,7 +123,6 @@
         if (doc.exists) {
           const serverPoint = doc.data().point || 0;
           
-          // 핵심 요건: 내 현재 로컬 점수가 서버에 기록된 최고 점수보다 높을 때만 닉네임과 점수 모두 교체
           if (userData.point > serverPoint) {
             userRef.update({
               name: newName,
@@ -132,7 +130,6 @@
               timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
           } else {
-            // 내 현재 점수가 서버 점수보다 낮거나 같다면, 점수는 유지하고 이름만 새 이름으로 교체
             userRef.update({
               name: newName
             });
@@ -145,7 +142,6 @@
       });
     }
 
-    // ✨ [랭킹 등록하기] 버튼 클릭 시 고유 ID 기준으로 최고 점수 저장하는 함수
     function updateRanking() {
       if (userData.name === "이름 없음") {
         alert("이름을 먼저 변경한 후 랭킹에 등록해주세요!");
@@ -221,20 +217,16 @@
         });
     }
 function find(name) {
-  // userData.inv 배열을 순회합니다.
   for (let i = 0; i < userData.inv.length; i++) {
-    // array[i] 대신 정확하게 userData.inv[i]를 참조합니다.
     const element = userData.inv[i]; 
     
-    // 만약 배열에 객체가 들어있다면 element.name == name 으로 수정해야 합니다.
-    if (element == name) {
+      if (element == name) {
       return i; // 찾으면 인덱스 번호 반환
     }
   }
   return null; // 못 찾으면 null 반환
 }
 function buyItem(type) {
-  // 1. 아이템 종류에 따른 가격과 이름을 데이터로 정의합니다.
   const itemConfig = {
     1: { name: "돋보기", price: 10 },
     2: { name: "포인트2", price: 100 },
@@ -242,29 +234,23 @@ function buyItem(type) {
     4: { name: "포인트버프", price: 2000 }
   };
 
-  // 잘못된 type이 들어오면 함수를 종료합니다.
   if (!itemConfig[type]) return;
 
   const { name, price } = itemConfig[type];
 
-  // 2. 유저의 코인이 충분한지 먼저 검사합니다.
   if (userData.coin < price) {
     alert("코인이 부족합니다!");
     return;
   }
 
-  // 3. 코인을 차감합니다.
   userData.coin -= price;
 
-  // 4. 이미 가지고 있는 아이템인지 한 번만 검색합니다.
   let itemIndex = find(name);
 
   if (itemIndex === null || itemIndex === -1) {
-    // 처음 사는 아이템이라면 인벤토리에 새로 추가
     userData.inv.push(name);
     userData.equip.push(1);
   } else {
-    // 이미 있는 아이템이라면 개수만 1 증가
     userData.equip[itemIndex] += 1;
   }
   save()
@@ -274,8 +260,6 @@ function buyItem(type) {
         document.getElementById('nickname').innerText = userData.name;
   document.getElementById("display-coin").innerText = userData.coin;
   document.getElementById("display-point").innerText = userData.point;
-  // (선택사항) 상점 UI 갱신 함수가 있다면 여기서 호출하세요.
-  // updateShopUI();
 }
   function save(){
     localStorage.setItem(key, JSON.stringify(userData));
