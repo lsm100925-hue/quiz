@@ -138,16 +138,12 @@
   let name = "";
   
 
-  // Check if the item exists (assuming find() returns -1 or null if not found)
   let showA = find("돋보기");
   if (showA !== null) {
-// 안전하게 개수를 가져온 후 (데이터가 없으면 0으로 표시)
 const count = userData.equip[showA] ?? 0;
 
-// 버튼의 텍스트를 변경합니다.
 document.getElementById("input").innerText = "정답 티켓 사용: "+ count;
 
-    // 2. Fill in the correct answer
       }
   function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -226,7 +222,6 @@ document.getElementById("input").innerText = "정답 티켓 사용: "+ count;
   
     save();
     
-    // ✨ 3. 로컬 저장이 끝나면 실시간으로 Firestore 서버 점수 데이터 업데이트 함수 실행
     updateServerRanking();
   }
 
@@ -234,9 +229,7 @@ document.getElementById("input").innerText = "정답 티켓 사용: "+ count;
     localStorage.setItem(key, JSON.stringify(userData));
   }
 
-  // ✨ 4. Firestore에 실시간으로 누적 최고 점수를 업데이트해 주는 스마트 함수
   function updateServerRanking() {
-    // 닉네임이 '이름 없음'이 아닐 때만 서버 랭킹 반영에 시도함
     if (userData.name === "이름 없음") return;
 
     const userRef = db.collection("rankings").doc(userData.uid);
@@ -244,7 +237,6 @@ document.getElementById("input").innerText = "정답 티켓 사용: "+ count;
     userRef.get().then((doc) => {
       if (doc.exists) {
         const serverPoint = doc.data().point || 0;
-        // 새로 누적된 내 총 포인트가 기존 서버 점수보다 높을 경우에만 전산 데이터 갱신
         if (userData.point > serverPoint) {
           userRef.update({
             point: userData.point,
@@ -254,7 +246,6 @@ document.getElementById("input").innerText = "정답 티켓 사용: "+ count;
           });
         }
       } else {
-        // 만약 랭킹 메인에서 [랭킹 등록]을 안 눌렀던 유저라면 여기서 자동으로 최초 등록 처리
         userRef.set({
           uid: userData.uid,
           name: userData.name,
@@ -269,41 +260,31 @@ document.getElementById("input").innerText = "정답 티켓 사용: "+ count;
     });
   }
 function find(name) {
-  // userData.inv 배열을 순회합니다.
   for (let i = 0; i < userData.inv.length; i++) {
-    // array[i] 대신 정확하게 userData.inv[i]를 참조합니다.
     const element = userData.inv[i]; 
     
-    // 만약 배열에 객체가 들어있다면 element.name == name 으로 수정해야 합니다.
     if (element == name) {
-      return i; // 찾으면 인덱스 번호 반환
+      return i; 
     }
   }
-  return null; // 못 찾으면 null 반환
+  return null; 
 }
   
 function pass() {
-  // Find the index of the magnifying glass
   let itemIndex = find("돋보기");
 
-  // Check if the item exists (assuming find() returns -1 or null if not found)
   if (itemIndex !== null && userData.equip[itemIndex] >= 1) {
-    // 1. Consume 1 magnifying glass
     userData.equip[itemIndex]--;
 
-    // 2. Fill in the correct answer
     document.getElementById("user-answer").value = currentQuestions[currentIndex].a;
     alert("사용 완료");
     save()
     
 const count = userData.equip[showA] ?? 0;
 
-// 버튼의 텍스트를 변경합니다.
 document.getElementById("input").innerText = "정답 티켓 사용: "+ count;
-    // Optional: Add logic here to advance to the next question or refresh the UI
   } else {
 
-    // Optional: Alert the user that they don't have the required item
     alert("정답 티켓이 부족합니다");
   }
 }
