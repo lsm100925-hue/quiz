@@ -19,8 +19,14 @@
           <button class="btn btn-category" onclick="selectCategory('무신')">
             무신 정권
           </button>
+          <button class="btn btn-category" onclick="selectCategory('무신심화')">
+            💀무신 어려움
+          </button>
           <button class="btn btn-category" onclick="selectCategory('사회')">
             사회 변화
+          </button>
+          <button class="btn btn-category" onclick="selectCategory('사회심화')">
+            💀사회 어려움
           </button>
           <button class="btn btn-category" onclick="selectCategory('일제')">
             일제 침략
@@ -31,6 +37,22 @@
           <button class="smallBtn" onclick="pass()" id="input">
             정답 티켓 사용
           </button>
+
+          <div style="text-align: center; margin: 15px 0">
+            <img
+              id="question-image"
+              src=""
+              alt="문제 이미지"
+              class="hidden"
+              style="
+                max-width: 100%;
+                max-height: 250px;
+                border-radius: 8px;
+                border: 1px solid #ccc;
+              "
+            />
+          </div>
+
           <h3 id="question-text">질문 준비 중...</h3>
           <input
             type="text"
@@ -154,6 +176,38 @@
             png: "오병.png",
           },
         ],
+
+        사회심화: [
+          {
+            q: "이 당시 고려는 신라에 비해 xx을 강조했다.",
+            a: "능력",
+            png: "능력고려.png",
+          },
+          {
+            q: "이 법을 시행하기 전에는 xx들이 감소하는 중이였다.",
+            a: "농민",
+            alt: "평민",
+            png: "진대.png",
+          },
+          {
+            q: "이 지방의 양인들은 xx이라고 불린다.",
+            a: "사림",
+            png: "서원.png",
+          },
+          {
+            q: "이때는 남성의 지위가 높았다 (예 / 아니)",
+            a: "아니",
+            png: "부곡.png",
+          },
+          {
+            q: "향부곡민 같이 천역을 맞았던 조선 양인은?",
+            a: "신량역천",
+          },
+          {
+            q: "천민은 모두 노비이다.",
+            a: "아니",
+          },
+        ],
         사회: [
           { q: "최초로 신분제가 시행되는 시기는?", a: "청동기" },
           { q: "고대의 신분은 (능력 / 혈통) 중심이다", a: "혈통" },
@@ -245,8 +299,20 @@
 
       function showQuestion() {
         if (currentIndex < currentQuestions.length) {
-          document.getElementById("question-text").innerText =
-            currentQuestions[currentIndex].q;
+          const currentQuiz = currentQuestions[currentIndex];
+
+          document.getElementById("question-text").innerText = currentQuiz.q;
+
+          // 변경점 3: 질문 데이터에 png 파일명이 있으면 이미지를 보여주고, 없으면 숨김 처리
+          const imgElement = document.getElementById("question-image");
+          if (currentQuiz.png) {
+            imgElement.src = currentQuiz.png; // 같은 폴더 내 이미지 파일 호출
+            imgElement.classList.remove("hidden");
+          } else {
+            imgElement.src = "";
+            imgElement.classList.add("hidden");
+          }
+
           document.getElementById("user-answer").value = "";
           document.getElementById("feedback").innerText = "";
           document.getElementById("user-answer").focus();
@@ -254,17 +320,23 @@
           showFinalResult();
         }
       }
-
       function submitAnswer() {
         const userVal = document.getElementById("user-answer").value.trim();
-        const correctVal = currentQuestions[currentIndex].a;
+        const currentQuiz = currentQuestions[currentIndex];
+        const correctVal = currentQuiz.a;
+        const altVal = currentQuiz.alt; // 대체 정답(alt) 가져오기
         const feedback = document.getElementById("feedback");
 
-        if (userVal === correctVal) {
+        // 원래 정답(a)과 일치하거나, 대체 정답(alt)이 존재하고 그것과 일치할 때
+        if (userVal === correctVal || (altVal && userVal === altVal)) {
           score++;
           feedback.innerHTML = "<span style='color:blue'>⭕ 정답!</span>";
         } else {
-          feedback.innerHTML = `<span style='color:red'>❌ 오답 (정답: ${correctVal})</span>`;
+          // 오답일 때 alt 값이 있다면 함께 표시
+          const showAnswer = altVal
+            ? `${correctVal} 또는 ${altVal}`
+            : correctVal;
+          feedback.innerHTML = `<span style='color:red'>❌ 오답 (정답: ${showAnswer})</span>`;
         }
 
         setTimeout(() => {
