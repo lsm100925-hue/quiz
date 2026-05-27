@@ -91,7 +91,7 @@
       
       if (savedData === null) {
         const setting = {
-          uid: generateUUID(), // ✨ 유저 고유 식별 ID 추가
+          uid: generateUUID(), 
           coin: 0,
           point: 0,
           lv: 1,
@@ -111,7 +111,7 @@
         }
       }
 
-      // 화면 데이터 반영
+      
       document.getElementById('nickname').innerText = userData.name;
       document.getElementById("display-coin").innerText = userData.coin;
       document.getElementById("display-point").innerText = userData.point;
