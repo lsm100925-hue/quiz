@@ -212,14 +212,15 @@
         });
     }
 function find(name) {
-  for (let i = 0; i < userData.inv.length; i++) {
-    const element = userData.inv[i]; 
-    
-      if (element == name) {
-      return i; 
-    }
-  }
-  return null; 
+      for (let i = 0; i < userData.inv.length; i++) {
+        const element = userData.inv[i]; 
+        
+        if (element == name) {
+          return i; 
+        }
+      }
+      return null; 
+    } // ✅ 누락되었던 닫는 중괄호 추가됨! 
 function buyItem(type) {
   const itemConfig = {
     1: { name: "돋보기", price: 10 },
