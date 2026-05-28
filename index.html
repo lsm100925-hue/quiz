@@ -167,47 +167,52 @@
     }
 
     // ✨ [랭킹 등록하기] 버튼 클릭 시 고유 ID 기준으로 최고 점수 저장하는 함수
-    function updateRanking() {
-      if (userData.name === "이름 없음") {
-        alert("이름을 먼저 변경한 후 랭킹에 등록해주세요!");
-        return;
-      }
+   function updateServerRanking() {
+        if (userData.name === "이름 없음") return;
 
-      // 문서의 ID를 '이름'이 아니라 생성한 고유 식별자 'uid'로 지정합니다.
-      const userRef = db.collection("rankings").doc(userData.uid);
+        const userRef = db.collection("rankings").doc(userData.uid);
 
-      userRef.get().then((doc) => {
-        if (doc.exists) {
-          // 기존 기록이 있다면, 현재 내 로컬 점수가 서버 점수보다 높을 때만 업데이트
-          const serverPoint = doc.data().point || 0;
-          if (userData.point > serverPoint) {
-            userRef.set({
+        userRef.get().then((doc) => {
+          let updateData = {};
+          let shouldUpdate = false;
+
+          if (doc.exists) {
+            const serverData = doc.data();
+            const serverPoint = serverData.point || 0;
+            const serverCoin = serverData.coin || 0;
+
+            // 포인트 갱신 체크
+            if (userData.point > serverPoint) {
+              updateData.point = userData.point;
+              shouldUpdate = true;
+            }
+            // 코인 갱신 체크
+            if (userData.coin > serverCoin) {
+              updateData.coin = userData.coin;
+              shouldUpdate = true;
+            }
+          } else {
+            // 처음 등록하는 경우
+            updateData = {
               uid: userData.uid,
               name: userData.name,
               point: userData.point,
-              timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-              alert("최고 기록이 경신되어 랭킹이 등록되었습니다! 🎉");
-            });
-          } else {
-            alert(`이미 더 높은 기록(${serverPoint}점)이 등록되어 있습니다!`);
+              coin: userData.coin,
+            };
+            shouldUpdate = true;
           }
-        } else {
-          // 아예 처음 랭킹판에 등록하는 고유 유저라면 새로 생성
-          userRef.set({
-            uid: userData.uid,
-            name: userData.name,
-            point: userData.point,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-          }).then(() => {
-            alert("랭킹에 처음으로 등록되었습니다! 축하합니다! 🏆");
-          });
-        }
-      }).catch((error) => {
-        console.error("랭킹 등록 에러: ", error);
-        alert("랭킹 등록에 실패했습니다.");
-      });
-    }
+
+          // 갱신할 데이터가 있다면 서버에 저장 (merge: true를 사용해 기존 데이터 유지)
+          if (shouldUpdate) {
+            updateData.timestamp = firebase.firestore.FieldValue.serverTimestamp();
+            userRef.set(updateData, { merge: true })
+              .then(() => {
+                console.log("랭킹이 업데이트되었습니다.");
+              })
+              .catch((error) => console.error("서버 랭킹 갱신 오류:", error));
+          }
+        });
+      }
 
     // Firestore에서 실시간으로 데이터를 읽어와 랭킹 테이블을 채우는 함수
     function listenRanking() {
