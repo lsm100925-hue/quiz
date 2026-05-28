@@ -31,24 +31,21 @@
       <button class="btn" onclick="location.href='store.html'">상점(실험 기능)</button>
       <button class="btn" style="background-color: #40c057; color: white;" onclick="updateServerRanking()">🏆 랭킹 등록하기</button>
     </div>
+<div id="ranking-area" class="hidden" style="color: #000000;">
+      <h2 style="color: #000000;">서버 랭킹</h2>
+      
+      <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 15px;">
+        <button class="btn" onclick="listenRanking('coin')">◀ 코인 랭킹</button>
+        <button class="btn" onclick="listenRanking('point')">포인트 랭킹 ▶</button>
+      </div>
 
-<div id="ranking-area" >
-          <h2>서버 랭킹</h2>
-          
-          <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 15px;">
-            <button class="btn" onclick="listenRanking('coin')">◀ 코인 랭킹</button>
-            <button class="btn" onclick="listenRanking('point')">포인트 랭킹 ▶</button>
-          </div>
-
-          <h3 id="ranking-title">⭐ 포인트 랭킹</h3>
-          
-          <table style="width: 100%; text-align: left; background: #f9f9f9; border-radius: 8px; border-collapse: collapse; margin-bottom: 15px;">
-            <tbody id="ranking-list">
-              </tbody>
-          </table>
-          
-          <button class="btn" onclick="closeRanking()">돌아가기</button>
-        </div>
+      <h3 id="ranking-title" style="color: #000000;">⭐ 포인트 랭킹</h3>
+      
+      <table style="width: 100%; text-align: left; background: #f9f9f9; border-radius: 8px; border-collapse: collapse; margin-bottom: 15px; color: #000000;">
+        <tbody id="ranking-list">
+        </tbody>
+      </table>
+    </div>
 
     <div id="setting">
       <br><br><br>
