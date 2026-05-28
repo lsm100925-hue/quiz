@@ -373,44 +373,51 @@
         localStorage.setItem(key, JSON.stringify(userData));
       }
 
-      function updateServerRanking() {
+function updateServerRanking() {
         if (userData.name === "이름 없음") return;
 
         const userRef = db.collection("rankings").doc(userData.uid);
 
-        userRef
-          .get()
-          .then((doc) => {
-            if (doc.exists) {
-              const serverPoint = doc.data().point || 0;
-              if (userData.point > serverPoint) {
-                userRef
-                  .update({
-                    point: userData.point,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                  })
-                  .then(() => {
-                    console.log(
-                      "서버 랭킹 점수가 최고 기록으로 업데이트되었습니다.",
-                    );
-                  });
-              }
-            } else {
-              userRef
-                .set({
-                  uid: userData.uid,
-                  name: userData.name,
-                  point: userData.point,
-                  timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                })
-                .then(() => {
-                  console.log("랭킹판에 신규 등록되었습니다.");
-                });
+        userRef.get().then((doc) => {
+          let updateData = {};
+          let shouldUpdate = false;
+
+          if (doc.exists) {
+            const serverData = doc.data();
+            const serverPoint = serverData.point || 0;
+            const serverCoin = serverData.coin || 0;
+
+            // 포인트 갱신 체크
+            if (userData.point > serverPoint) {
+              updateData.point = userData.point;
+              shouldUpdate = true;
             }
-          })
-          .catch((error) => {
-            console.error("서버 랭킹 갱신 오류:", error);
-          });
+            // 코인 갱신 체크
+            if (userData.coin > serverCoin) {
+              updateData.coin = userData.coin;
+              shouldUpdate = true;
+            }
+          } else {
+            // 처음 등록하는 경우
+            updateData = {
+              uid: userData.uid,
+              name: userData.name,
+              point: userData.point,
+              coin: userData.coin,
+            };
+            shouldUpdate = true;
+          }
+
+          // 갱신할 데이터가 있다면 서버에 저장 (merge: true를 사용해 기존 데이터 유지)
+          if (shouldUpdate) {
+            updateData.timestamp = firebase.firestore.FieldValue.serverTimestamp();
+            userRef.set(updateData, { merge: true })
+              .then(() => {
+                console.log("랭킹이 업데이트되었습니다.");
+              })
+              .catch((error) => console.error("서버 랭킹 갱신 오류:", error));
+          }
+        });
       }
       function find(name) {
         for (let i = 0; i < userData.inv.length; i++) {
