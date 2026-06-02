@@ -230,7 +230,7 @@
         // 3. 새로운 실시간 리스너 등록
         unsubscribeRanking = db.collection("rankings")
           .orderBy(type, "desc")
-          .limit(5)
+          .limit(20)
           .onSnapshot((snapshot) => {
             const rankingListBody = document.getElementById("ranking-list");
             rankingListBody.innerHTML = ""; 
